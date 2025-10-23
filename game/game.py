@@ -1,4 +1,4 @@
-from models import Entry, Player
+from game.models import Entry, Player
 import asyncio
 import random 
 import config
@@ -11,7 +11,7 @@ class GameSession:
 
 
         self.players: dict[int, Player] = {}
-        self.list_owners: set[int] = ()
+        self.list_owners: set[int] = set()
         self.entries: list[Entry] = []
         self._lock = asyncio.Lock()
         self.current_entry = None
@@ -42,7 +42,7 @@ class GameSession:
         if not unrevealed_entries:
             return None
         
-        async with self._lock():
+        async with self._lock:
             self.current_entry = random.choice(unrevealed_entries)
             self.current_entry.revealed = True
         
