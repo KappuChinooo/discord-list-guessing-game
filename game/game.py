@@ -4,7 +4,12 @@ import random
 import config
 
 class GameSession:
-    def __init__(self):
+    def __init__(self, mode, fav_num, hated_num):
+        self.mode = mode
+        self.fav_num = fav_num
+        self.hated_num = hated_num
+
+
         self.players: dict[int, Player] = {}
         self.list_owners: set[int] = ()
         self.entries: list[Entry] = []
@@ -13,7 +18,7 @@ class GameSession:
 
     async def submit_entry(self, player_id, entry_name, category):
         if self.current_entry: 
-            return None
+            return
         async with self._lock:
             self.list_owners.add(player_id)
             existing = next((e for e in self.entries if e.name.strip().lower() == entry_name.strip().lower()), None)
@@ -48,7 +53,7 @@ class GameSession:
         BOTH_CORRECT_POINTS = config.BOTH_CORRECT_POINTS
 
         if entry.scored:
-            return None
+            return
         
         score_log = {}
 
