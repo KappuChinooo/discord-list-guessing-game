@@ -1,5 +1,7 @@
 # Favorite/Hated list guessing game
 
+## It's still not working don't try to run it
+
 ### Description
 A discord party game where players submit their favorite and hated list of anime or its characters, and everyone tries to guess who picked what and whether they liked or hated it.
 
