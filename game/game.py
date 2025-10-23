@@ -10,11 +10,10 @@ class GameSession:
         self.entries: list[Entry] = []
         self.lock = asyncio.Lock()
         self.current_entry = None
-        self.game_started = False
 
     async def submit_entry(self, player_id, entry_name, category):
-        if self.game_started: 
-            return
+        if self.current_entry: 
+            return None
         async with self.lock:
             self.list_owners.add(player_id)
             existing = next((e for e in self.entries if e.name.strip().lower() == entry_name.strip().lower()), None)
@@ -72,3 +71,6 @@ class GameSession:
         players_list = list(self.players.values())
         players_list.sort(key=lambda p: p.score, reverse=True)
         return players_list
+    
+    async def is_game_over(self):
+        return all(entry.scored for entry in self.entries)
