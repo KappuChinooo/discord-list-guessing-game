@@ -8,13 +8,13 @@ class GameSession:
         self.players: dict[int, Player] = {}
         self.list_owners: set[int] = ()
         self.entries: list[Entry] = []
-        self.lock = asyncio.Lock()
+        self._lock = asyncio.Lock()
         self.current_entry = None
 
     async def submit_entry(self, player_id, entry_name, category):
         if self.current_entry: 
             return None
-        async with self.lock:
+        async with self._lock:
             self.list_owners.add(player_id)
             existing = next((e for e in self.entries if e.name.strip().lower() == entry_name.strip().lower()), None)
             if existing:
@@ -28,7 +28,7 @@ class GameSession:
         if self.current_entry is None:
             return
         player = self.players.setdefault(player_id, Player(player_id))
-        async with self.lock:
+        async with self._lock:
             self.current_entry.guesses[player.id] = (owner_guess, favorited_guess)
 
     async def next_entry(self):
@@ -37,7 +37,7 @@ class GameSession:
         if not unrevealed_entries:
             return None
         
-        async with self.lock():
+        async with self._lock():
             self.current_entry = random.choice(unrevealed_entries)
             self.current_entry.revealed = True
         
@@ -52,7 +52,7 @@ class GameSession:
         
         score_log = {}
 
-        async with self.lock:
+        async with self._lock:
             for player_id, (owner_guess, category_guess) in entry.guesses.items():
                 if player_id in entry.owners and not config.can_score_on_own_list:
                     continue
@@ -67,10 +67,10 @@ class GameSession:
                 self.players[player_id].score += points_awarded
             entry.scored = True
 
-    async def get_scores(self):
+    def get_scores(self):
         players_list = list(self.players.values())
         players_list.sort(key=lambda p: p.score, reverse=True)
         return players_list
     
-    async def is_game_over(self):
+    def is_game_over(self):
         return all(entry.scored for entry in self.entries)
